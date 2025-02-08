@@ -2,10 +2,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
+import { useAuth } from "@/context/AuthContext";
 export default function Home() {
   const router = useRouter();
-
+  const { isAuthenticated, logout } = useAuth();
   useEffect(() => {
     // Check if the user is authenticated
     const token = localStorage.getItem("token");
@@ -17,8 +17,7 @@ export default function Home() {
 
   const handleLogout = () => {
     // Remove the token from local storage
-    localStorage.removeItem("token");
-    // Redirect to the login page
+    logout();
     router.push("/login");
   };
 

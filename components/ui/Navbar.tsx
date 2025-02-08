@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
-  const isAuthenticated = !!localStorage.getItem("token");
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    logout();
     router.push("/login");
   };
 

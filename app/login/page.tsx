@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,8 +20,8 @@ export default function Login() {
         email,
         password,
       });
-      // Store the JWT token in local storage
-      localStorage.setItem("token", response.data.token);
+      // Call the login function from AuthContext
+      login(response.data.token);
       console.log("Login successful:", response.data);
       // Redirect to the landing page
       router.push("/");

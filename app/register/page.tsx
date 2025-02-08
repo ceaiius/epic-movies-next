@@ -5,25 +5,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/api/auth/register", {
+      const response = await axios.post("http://localhost:8000/api/register", {
         name,
         email,
         password,
       });
-      // Store the JWT token in local storage
-      localStorage.setItem("token", response.data.token);
+      // Call the login function from AuthContext
+      login(response.data.token);
       console.log("Registration successful:", response.data);
+      // Redirect to the landing page
       router.push("/");
     } catch (error) {
       console.error("Registration failed:", error);
+      alert("Registration failed. Please try again.");
     }
   };
 
