@@ -1,33 +1,82 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
-export default function Home() {
-  const router = useRouter();
-  const { isAuthenticated, logout } = useAuth();
-  useEffect(() => {
-    // Check if the user is authenticated
-    const token = localStorage.getItem("token");
-    if (!token) {
-      // Redirect to login if no token is found
-      router.push("/login");
-    }
-  }, [router]);
+import PostCard from "@/components/PostCard";
+import AddPostModal from "@/components/AddPostModal";
 
-  const handleLogout = () => {
-    // Remove the token from local storage
-    logout();
-    router.push("/login");
+type Post = {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
+export default function Home() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const { isAuthenticated } = useAuth();
+  const [postToEdit, setPostToEdit] = useState<Post | undefined>(undefined);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/posts");
+      setPosts(response.data);
+    } catch (error) {
+      console.error("Failed to fetch posts:", error);
+    }
   };
 
+  const handleDelete = async (id: string) => {
+    console.log("Deleting post with ID:", id); // Add this line
+    try {
+      await axios.delete(`http://localhost:8000/api/posts/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      fetchPosts(); // Refresh the posts
+    } catch (error) {
+      console.error("Failed to delete post:", error);
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    const postToEdit = posts.find((post) => post._id === id);
+    if (postToEdit) {
+      setPostToEdit(postToEdit);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchPosts();
+    }
+  }, [isAuthenticated]);
+
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold text-gray-800">Welcome to the Landing Page</h1>
-      <p className="mt-2 text-gray-600">You are authenticated!</p>
-      <Button onClick={handleLogout} className="mt-4">
-        Logout
-      </Button>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">News Feed</h1>
+        <AddPostModal
+          onPostAdded={fetchPosts}
+          postToEdit={postToEdit}
+          onClose={() => setPostToEdit(undefined)} // Reset the postToEdit state when the modal is closed
+        />
+      </div>
+      <div className="flex flex-col items-center">
+        {posts.map((post) => (
+          <PostCard
+            key={post._id}
+            _id={post._id}
+            title={post.title}
+            description={post.description}
+            imageUrl={post.imageUrl}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
     </div>
   );
 }

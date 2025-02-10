@@ -22,12 +22,9 @@ export default function Login() {
       });
       // Call the login function from AuthContext
       login(response.data.token);
-      console.log("Login successful:", response.data);
-      // Redirect to the landing page
       router.push("/");
     } catch (error) {
-      console.error("Login failed:", error);
-      alert("Login failed. Please check your credentials.");
+      console.error(error);
     }
   };
 
