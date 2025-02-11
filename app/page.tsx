@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import PostCard from "@/components/PostCard";
 import AddPostModal from "@/components/AddPostModal";
+import { useRouter } from "next/navigation";
 
 type Post = {
   _id: string;
@@ -11,14 +12,18 @@ type Post = {
   quote: string;
   author: {
     _id: string;
+    name: string;
   };
 };
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [postToEdit, setPostToEdit] = useState<Post | undefined>(undefined);
+  const router = useRouter();
 
+  const token = localStorage.getItem("token");
+  const config = token ? { headers: { Authorization: `Bearer ${token}`,  }} : {withCredentials: true,};
   const fetchPosts = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/posts");
@@ -31,11 +36,7 @@ export default function Home() {
   const handleDelete = async (id: string) => {
     console.log("Deleting post with ID:", id); // Add this line
     try {
-      await axios.delete(`http://localhost:8000/api/posts/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.delete(`http://localhost:8000/api/posts/${id}`, config);
       fetchPosts(); // Refresh the posts
     } catch (error) {
       console.error("Failed to delete post:", error);
@@ -50,10 +51,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }else{
       fetchPosts();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading, router]);
 
 
   return (
@@ -61,7 +64,7 @@ export default function Home() {
       {isAuthenticated ? 
       <>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold pt-6">News Feed</h1>
+        <div></div>
         <AddPostModal
           onPostAdded={fetchPosts}
           postToEdit={postToEdit}

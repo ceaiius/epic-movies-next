@@ -32,7 +32,7 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center pt-20 min-h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="w-full max-w-sm p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
         <div className="mb-4">
@@ -65,7 +65,7 @@ export default function Register() {
             required
           />
         </div>
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full bg-[#D91656] text-white">
           Register
         </Button>
       </form>

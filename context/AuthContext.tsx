@@ -5,11 +5,12 @@ type User = {
   _id: string;
   name: string;
   email: string;
-}
+};
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  user : User | null;
+  user: User | null;
+  isLoading: boolean; // Add loading state
   login: (token: string) => void;
   logout: () => void;
 };
@@ -19,14 +20,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  // Check for token in local storage on initial load
+  const [isLoading, setIsLoading] = useState(true); 
+
+  // Check for token on initial load
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsAuthenticated(true);
-      fetchUser(token);
-    }
+    const verifyToken = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/auth/user", {
+          method: "GET",
+          credentials: "include", 
+        });
+
+        if (!res.ok) throw new Error("Token verification failed");
+
+        const userData = await res.json();
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error(error);
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false); 
+      }
+    };
+
+    verifyToken();
   }, []);
+
+  const login = (token: string) => {
+    localStorage.setItem("token", token);
+    document.cookie = `token=${token}; path=/;`;
+    fetchUser(token);
+    setIsAuthenticated(true);
+  };
 
   const fetchUser = async (token: string) => {
     try {
@@ -48,19 +75,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = (token: string) => {
-    localStorage.setItem("token", token);
-    setIsAuthenticated(true);
-    fetchUser(token);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      // Clear the token from localStorage (email/password users)
+      localStorage.removeItem("token");
+  
+      // Clear the token cookie (Google-authenticated users)
+      await fetch("http://localhost:8000/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // Include cookies in the request
+      });
+  
+      // Update the authentication state
+      setIsAuthenticated(false);
+      setUser(null);
+    } catch (error) {
+      console.error("Failed to logout:", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

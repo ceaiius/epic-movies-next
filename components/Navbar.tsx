@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-md p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold text-gray-800">
+        <Link href="/" className="text-xl font-bold text-[#D91656]">
           Epic movie quotes
         </Link>
         <div className="flex space-x-4">
@@ -30,7 +30,7 @@ export default function Navbar() {
                 <Button variant="outline">Login</Button>
               </Link>
               <Link href="/register">
-                <Button>Register</Button>
+                <Button className="bg-[#D91656]">Register</Button>
               </Link>
             </>
           )}

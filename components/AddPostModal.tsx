@@ -16,7 +16,6 @@ type AddPostModalProps = {
   onClose: () => void;
 };
 
-
 export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPostModalProps) {
   const [title, setTitle] = useState("");
   const [quote, setQuote] = useState("");
@@ -26,45 +25,46 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
     if (postToEdit) {
       setTitle(postToEdit.title);
       setQuote(postToEdit.quote);
-      setIsOpen(true); // Open the modal when postToEdit is set
+      setIsOpen(true);
     }
   }, [postToEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
     try {
+      const token = localStorage.getItem("token");
+  
+      const config = token
+        ? {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        : {
+            withCredentials: true,
+          };
+  
       if (postToEdit) {
-        // Update existing post
         await axios.put(
           `http://localhost:8000/api/posts/${postToEdit._id}`,
           { title, quote },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          config
         );
       } else {
-        // Add new post
         await axios.post(
           "http://localhost:8000/api/posts",
           { title, quote },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          config
         );
       }
-      setIsOpen(false); // Close the modal
-      onPostAdded(); // Refresh the posts
-      onClose(); // Reset the postToEdit state
+  
+      setIsOpen(false);
+      onPostAdded();
+      onClose();
     } catch (error) {
       console.error("Failed to save post:", error);
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) {
@@ -73,7 +73,7 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
       setIsOpen(open);
     }}>
       <DialogTrigger asChild>
-        <Button>{postToEdit ? "Edit Post" : "Add Post"}</Button>
+        <Button className="bg-[#D91656] text-white">{postToEdit ? "Edit Post" : "Add Post"}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -99,7 +99,7 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
             />
           </div>
    
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-[#D91656] text-white">
             {postToEdit ? "Update Post" : "Add Post"}
           </Button>
         </form>

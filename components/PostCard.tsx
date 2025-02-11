@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 type PostCardProps = {
   _id: string;
   title: string;
-  author: { _id: string; };
+  author: { _id: string; name: string };
   quote: string;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -20,10 +20,8 @@ const { user } = useAuth();
     <Card className="w-full max-w-2xl mx-auto my-4">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>{title}</CardTitle>
-          </div>
-          {author._id === user?._id && 
+        <CardTitle className="text-[#D91656] font-bold">Author: {author.name}</CardTitle>
+        {author._id === user?._id && 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -43,8 +41,13 @@ const { user } = useAuth();
           </DropdownMenu>
           }
         </div>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle >Movie Title: {title}</CardTitle>
+          </div>
+        </div>
         <div>
-        <CardTitle>{quote}</CardTitle>
+        <CardTitle className="pt-2">Quote: {quote}</CardTitle>
       </div>
       </CardHeader>
       

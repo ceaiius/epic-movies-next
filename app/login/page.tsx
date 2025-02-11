@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
+import { FcGoogle } from "react-icons/fc";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -28,8 +29,14 @@ export default function Login() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    // Redirect to backend Google OAuth route
+    window.location.href = "http://localhost:8000/api/auth/google";
+  };
+
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center pt-20 min-h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="w-full max-w-sm p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
         <div className="mb-4">
@@ -52,8 +59,16 @@ export default function Login() {
             required
           />
         </div>
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full bg-[#D91656] text-white">
           Login
+        </Button>
+        <Button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full bg-white mt-4 hover:bg-gray-100 text-gray-700 font-bold py-2 rounded-lg border border-gray-300 flex items-center justify-center gap-2"
+        >
+          <FcGoogle className="w-5 h-5" />
+          <span>Continue with Google</span>
         </Button>
       </form>
     </div>
