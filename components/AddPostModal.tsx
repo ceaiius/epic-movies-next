@@ -4,15 +4,14 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type AddPostModalProps = {
   onPostAdded: () => void;
   postToEdit?: {
     _id: string;
     title: string;
-    description: string;
-    imageUrl: string;
+    quote: string;
   };
   onClose: () => void;
 };
@@ -20,15 +19,13 @@ type AddPostModalProps = {
 
 export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPostModalProps) {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [quote, setQuote] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (postToEdit) {
       setTitle(postToEdit.title);
-      setDescription(postToEdit.description);
-      setImageUrl(postToEdit.imageUrl);
+      setQuote(postToEdit.quote);
       setIsOpen(true); // Open the modal when postToEdit is set
     }
   }, [postToEdit]);
@@ -41,7 +38,7 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
         // Update existing post
         await axios.put(
           `http://localhost:8000/api/posts/${postToEdit._id}`,
-          { title, description, imageUrl },
+          { title, quote },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -52,7 +49,7 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
         // Add new post
         await axios.post(
           "http://localhost:8000/api/posts",
-          { title, description, imageUrl },
+          { title, quote },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -81,9 +78,6 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{postToEdit ? "Edit Post" : "Add a New Post"}</DialogTitle>
-          <DialogDescription>
-            {postToEdit ? "Update the post details below." : "Fill in the details below to create a new post."}
-          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -96,23 +90,15 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
             />
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="title">Quote</Label>
             <Input
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              id="quote"
+              value={quote}
+              onChange={(e) => setQuote(e.target.value)}
               required
             />
           </div>
-          <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-            
-            />
-          </div>
+   
           <Button type="submit" className="w-full">
             {postToEdit ? "Update Post" : "Add Post"}
           </Button>

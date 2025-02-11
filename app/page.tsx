@@ -8,8 +8,10 @@ import AddPostModal from "@/components/AddPostModal";
 type Post = {
   _id: string;
   title: string;
-  description: string;
-  imageUrl: string;
+  quote: string;
+  author: {
+    _id: string;
+  };
 };
 
 export default function Home() {
@@ -56,27 +58,28 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4">
+      {isAuthenticated ? 
+      <>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">News Feed</h1>
+        <h1 className="text-3xl font-bold pt-6">News Feed</h1>
         <AddPostModal
           onPostAdded={fetchPosts}
           postToEdit={postToEdit}
           onClose={() => setPostToEdit(undefined)} // Reset the postToEdit state when the modal is closed
         />
-      </div>
-      <div className="flex flex-col items-center">
-        {posts.map((post) => (
-          <PostCard
-            key={post._id}
-            _id={post._id}
-            title={post.title}
-            description={post.description}
-            imageUrl={post.imageUrl}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      </div><div className="flex flex-col items-center">
+          {posts.map((post) => (
+            <PostCard
+              key={post._id}
+              _id={post._id}
+              title={post.title}
+              author={post.author}
+              quote={post.quote}
+              onEdit={handleEdit}
+              onDelete={handleDelete} />
+          ))}
+        </div>
+      </> : <p className="text-center">Please login to view the posts</p>}
     </div>
   );
 }

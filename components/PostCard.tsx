@@ -1,28 +1,29 @@
 "use client";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import Image from "next/image";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 type PostCardProps = {
   _id: string;
   title: string;
-  description: string;
-  imageUrl: string;
+  author: { _id: string; };
+  quote: string;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 };
 
-export default function PostCard({ _id, title, description, imageUrl, onEdit, onDelete }: PostCardProps) {
+export default function PostCard({ _id, title, quote, author, onEdit, onDelete }: PostCardProps) {
+const { user } = useAuth();
   return (
     <Card className="w-full max-w-2xl mx-auto my-4">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
             <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
           </div>
+          {author._id === user?._id && 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -40,18 +41,13 @@ export default function PostCard({ _id, title, description, imageUrl, onEdit, on
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          }
         </div>
+        <div>
+        <CardTitle>{quote}</CardTitle>
+      </div>
       </CardHeader>
-      <CardContent>
-        <div className="relative aspect-video">
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className="rounded-lg object-cover"
-          />
-        </div>
-      </CardContent>
+      
     </Card>
   );
 }
