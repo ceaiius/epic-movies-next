@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -21,9 +21,23 @@ export default function Navbar() {
         </Link>
         <div className="flex space-x-4">
           {isAuthenticated ? (
-            <Button onClick={handleLogout} variant="outline">
+            <div className="flex space-x-4">
+              <Button onClick={handleLogout} variant="outline">
               Logout
             </Button>
+            <Link href="/profile">
+                {user?.avatar ? (
+                  <img
+                    src={'http://localhost:8000/' + user.avatar}
+                    alt="Avatar"
+                    className="w-10 h-10 rounded-full"
+                  />
+                ) : (
+                  <Button variant="outline">Profile</Button>
+                )}
+              </Link>
+            </div>
+            
           ) : (
             <>
               <Link href="/login">

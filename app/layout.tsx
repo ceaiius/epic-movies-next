@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google"; // Import Roboto
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const roboto = Roboto({
   weight: ["400", "500", "700"],
@@ -28,6 +29,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           {children}
+          <Toaster/>
         </AuthProvider>
       </body>
     </html>

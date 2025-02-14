@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 type User = {
   _id: string;
+  avatar: string | null;
   name: string;
   email: string;
 };
