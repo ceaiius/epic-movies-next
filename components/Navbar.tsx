@@ -15,6 +15,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-md p-4">
+     
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl font-bold text-[#D91656]">
           Epic movie quotes
@@ -25,17 +26,19 @@ export default function Navbar() {
               <Button onClick={handleLogout} variant="outline">
               Logout
             </Button>
-            <Link href="/profile">
-                {user?.avatar ? (
-                  <img
-                    src={'http://localhost:8000/' + user.avatar}
-                    alt="Avatar"
-                    className="w-10 h-10 rounded-full"
-                  />
-                ) : (
-                  <Button variant="outline">Profile</Button>
-                )}
-              </Link>
+            {user?.googleId == null && (
+              <Link href="/profile">
+              {user?.avatar ? (
+                <img
+                  src={process.env.NEXT_PUBLIC_BASE_URL + user.avatar}
+                  alt="Avatar"
+                  className="w-10 h-10 rounded-full"
+                />
+              ) : (
+                <Button variant="outline">Profile</Button>
+              )}
+          </Link>
+            )}
             </div>
             
           ) : (

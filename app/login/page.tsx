@@ -17,7 +17,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/api/auth/login", {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}auth/login`, {
         email,
         password,
       });
@@ -31,7 +31,7 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth route
-    window.location.href = "http://localhost:8000/api/auth/google";
+    window.location.href =`${process.env.NEXT_PUBLIC_API_URL}auth/google`;
   };
 
 

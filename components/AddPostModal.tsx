@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
+import { toast } from "@/hooks/use-toast";
 type AddPostModalProps = {
   onPostAdded: () => void;
   postToEdit?: {
@@ -20,14 +20,22 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
   const [title, setTitle] = useState("");
   const [quote, setQuote] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-
+  const [editSuccess, setEditSuccess] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(false);
   useEffect(() => {
     if (postToEdit) {
       setTitle(postToEdit.title);
       setQuote(postToEdit.quote);
       setIsOpen(true);
     }
-  }, [postToEdit]);
+    if(editSuccess){
+      toast({ title: "Success", description: "Post edited successfully!" });
+      setEditSuccess(false);
+    }else if(addSuccess){
+      toast({ title: "Success", description: "Post added successfully!" });
+      setAddSuccess(false);
+    }
+  }, [postToEdit, editSuccess, addSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,16 +54,18 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
   
       if (postToEdit) {
         await axios.put(
-          `http://localhost:8000/api/posts/${postToEdit._id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}posts/${postToEdit._id}`,
           { title, quote },
           config
         );
+        setEditSuccess(true);
       } else {
         await axios.post(
-          "http://localhost:8000/api/posts",
+          `${process.env.NEXT_PUBLIC_API_URL}posts`,
           { title, quote },
           config
         );
+        setAddSuccess(true);
       }
   
       setIsOpen(false);

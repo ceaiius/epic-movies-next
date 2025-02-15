@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import PostCard from "@/components/PostCard";
 import AddPostModal from "@/components/AddPostModal";
 import { useRouter } from "next/navigation";
-
+import { toast } from "@/hooks/use-toast";
 type Post = {
   _id: string;
   title: string;
@@ -20,13 +20,14 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const { isAuthenticated, isLoading } = useAuth();
   const [postToEdit, setPostToEdit] = useState<Post | undefined>(undefined);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);  
   const router = useRouter();
 
   const token = localStorage.getItem("token");
   const config = token ? { headers: { Authorization: `Bearer ${token}`,  }} : {withCredentials: true,};
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/posts");
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}posts`);
       setPosts(response.data);
     } catch (error) {
       console.error("Failed to fetch posts:", error);
@@ -36,7 +37,8 @@ export default function Home() {
   const handleDelete = async (id: string) => {
     console.log("Deleting post with ID:", id); // Add this line
     try {
-      await axios.delete(`http://localhost:8000/api/posts/${id}`, config);
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}posts/${id}`, config);
+      setDeleteSuccess(true);
       fetchPosts(); // Refresh the posts
     } catch (error) {
       console.error("Failed to delete post:", error);
@@ -56,7 +58,11 @@ export default function Home() {
     }else{
       fetchPosts();
     }
-  }, [isAuthenticated, isLoading, router]);
+    if(deleteSuccess){
+      toast({ title: "Success", description: "Post edited successfully!" });
+      setDeleteSuccess(false);
+    }
+  }, [isAuthenticated, isLoading, router, deleteSuccess]);
 
 
   return (

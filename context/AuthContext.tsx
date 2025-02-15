@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 type User = {
   _id: string;
+  googleId: string | null;
   avatar: string | null;
   name: string;
   email: string;
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/auth/user", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}auth/user`, {
           method: "GET",
           credentials: "include", 
         });
@@ -58,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUser = async (token: string) => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/user", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}auth/user`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -82,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem("token");
   
       // Clear the token cookie (Google-authenticated users)
-      await fetch("http://localhost:8000/api/auth/logout", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}auth/logout`, {
         method: "POST",
         credentials: "include", // Include cookies in the request
       });
