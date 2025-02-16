@@ -85,18 +85,17 @@ export default function Home() {
 
 
   useEffect(() => {
-    // This useEffect is now ONLY for fetching when currentPage changes
     if (currentPage > 1) {
       fetchPosts();
     }
   }, [currentPage, fetchPosts]);
 
   const handleDelete = async (id: string) => {
-    console.log("Deleting post with ID:", id);
+
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}posts/${id}`, config);
       setDeleteSuccess(true);
-      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== id)); // Remove the deleted post
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== id));
     } catch (error) {
       console.error("Failed to delete post:", error);
     }
@@ -125,13 +124,13 @@ export default function Home() {
             <AddPostModal
               onPostAdded={fetchPosts}
               postToEdit={postToEdit}
-              onClose={() => setPostToEdit(undefined)} // Reset the postToEdit state when the modal is closed
+              onClose={() => setPostToEdit(undefined)}
             />
           </div>
           <div className="flex flex-col items-center">
             {posts.map((post) => (
               <PostCard
-                key={post._id} // Use post._id as the key
+                key={post._id}
                 _id={post._id}
                 title={post.title}
                 author={post.author}

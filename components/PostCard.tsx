@@ -4,6 +4,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { MoreVertical, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import Comment from "./Comment";
+
 
 type PostCardProps = {
   _id: string;
@@ -15,7 +17,10 @@ type PostCardProps = {
 };
 
 export default function PostCard({ _id, title, quote, author, onEdit, onDelete }: PostCardProps) {
-const { user } = useAuth();
+
+  const { user } = useAuth();
+  
+
   return (
     <Card className="w-full max-w-2xl mx-auto my-4">
       <CardHeader>
@@ -50,7 +55,7 @@ const { user } = useAuth();
         <CardTitle className="pt-2">Quote: {quote}</CardTitle>
       </div>
       </CardHeader>
-      
+      <Comment _id={_id}/>
     </Card>
   );
 }
