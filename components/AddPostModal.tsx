@@ -67,7 +67,8 @@ export default function AddPostModal({ onPostAdded, postToEdit, onClose }: AddPo
         );
         setAddSuccess(true);
       }
-  
+      setQuote("");
+      setTitle("");
       setIsOpen(false);
       onPostAdded();
       onClose();
