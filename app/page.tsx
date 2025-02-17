@@ -128,9 +128,9 @@ export default function Home() {
             />
           </div>
           <div className="flex flex-col items-center">
-            {posts.map((post) => (
+            {posts.map((post, index) => (
               <PostCard
-                key={post._id}
+                key={index}
                 _id={post._id}
                 title={post.title}
                 author={post.author}

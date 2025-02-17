@@ -3,16 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "./ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem} from "@/components/ui/dropdown-menu";
 import { MoreVertical, Edit, Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import socket from "@/lib/socket";
+
 type CommentProps = {
   _id: string;
 };
@@ -25,6 +21,7 @@ type Comment = {
     name: string;
     avatar?: string;
   };
+  post: string;
 };
 
 export default function Comment({ _id }: CommentProps) {
@@ -34,6 +31,7 @@ export default function Comment({ _id }: CommentProps) {
   const token = localStorage.getItem("token");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editedCommentText, setEditedCommentText] = useState("");
+  const postIdRef = useRef(_id);
 
   const config = useMemo(
     () =>
@@ -56,12 +54,11 @@ export default function Comment({ _id }: CommentProps) {
     if (!newComment.trim()) return;
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}comments`,
         { postId: _id, text: newComment },
         config
       );
-      setComments((prevComments) => [response.data, ...prevComments]);
       setNewComment("");
     } catch (error) {
       console.error("Failed to add comment:", error);
@@ -69,12 +66,10 @@ export default function Comment({ _id }: CommentProps) {
   };
 
   const handleCommentDelete = async (id: string) => {
-    console.log("Deleting post with ID:", id);
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}comments/${id}`, config);
-      setComments((prevComments) => prevComments.filter((comment) => comment._id !== id));
     } catch (error) {
-      console.error("Failed to delete post:", error);
+      console.error("Failed to delete comment:", error);
     }
   };
 
@@ -90,18 +85,11 @@ export default function Comment({ _id }: CommentProps) {
     if (!editedCommentText.trim()) return;
 
     try {
-        await axios.put(
+      await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}comments/${id}`,
         { text: editedCommentText },
         config
       );
-
-      setComments((prevComments) =>
-        prevComments.map((comment) =>
-          comment._id === id ? { ...comment, text: editedCommentText } : comment
-        )
-      );
-      
       setEditingCommentId(null);
       setEditedCommentText("");
     } catch (error) {
@@ -114,53 +102,83 @@ export default function Comment({ _id }: CommentProps) {
   }, []);
 
   useEffect(() => {
-    
-    socket.on("newComment", (newComment) => {
-      setComments((prevComments) => [newComment, ...prevComments]);
-    });
-    console.log(comments);
-    
-    return () => {
-      socket.off("newComment");
+    postIdRef.current = _id;
+  }, [_id]);
+
+  useEffect(() => {
+    // Listen for new comments
+    const handleNewComment = (newComment: Comment) => {
+      if (newComment.post === postIdRef.current) {
+        setComments((prevComments) => [newComment, ...prevComments]);
+      }
     };
-  }, [comments]);
+
+    // Listen for deleted comments
+    const handleCommentDeleted = (deletedCommentId: string) => {
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment._id !== deletedCommentId)
+      );
+    };
+
+    // Listen for updated comments
+    const handleCommentUpdated = (updatedComment: Comment) => {
+      console.log(updatedComment);
+      
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === updatedComment._id ? updatedComment : comment
+        )
+      );
+
+    };
+
+    // Attach listeners
+    socket.on("newComment", handleNewComment);
+    socket.on("commentDeleted", handleCommentDeleted);
+    socket.on("commentUpdated", handleCommentUpdated);
+
+    // Cleanup listeners on unmount
+    return () => {
+      socket.off("newComment", handleNewComment);
+      socket.off("commentDeleted", handleCommentDeleted);
+      socket.off("commentUpdated", handleCommentUpdated);
+    };
+  }, [_id]);
 
   return (
     <div className="mt-4 p-6">
       <h3 className="font-bold mb-2">Comments</h3>
-      {comments.map((comment, index) => (
-        <div key={index} className="mt-2 p-2 border rounded">
+      {comments.map((comment) => (
+        <div key={comment._id} className="mt-2 p-2 border rounded">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <img
-                  src={comment.author.avatar ? process.env.NEXT_PUBLIC_BASE_URL + comment.author.avatar : process.env.NEXT_PUBLIC_BASE_URL + 'uploads/default'}
-                  alt={comment.author.name}
-                  className="w-6 h-6 rounded-full"
-                />
+              <img
+                src={comment.author.avatar ? process.env.NEXT_PUBLIC_BASE_URL + comment.author.avatar : process.env.NEXT_PUBLIC_BASE_URL + 'uploads/default'}
+                alt={comment.author.name}
+                className="w-6 h-6 rounded-full"
+              />
               <p className="font-bold">{comment.author.name}</p>
             </div>
 
-            <div>
-              {comment.author._id === user?._id && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleCommentEdit(comment._id)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCommentDelete(comment._id)}>
-                      <Trash className="mr-2 h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
+            {comment.author._id === user?._id && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleCommentEdit(comment._id)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    <span>Edit</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleCommentDelete(comment._id)}>
+                    <Trash className="mr-2 h-4 w-4" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {editingCommentId === comment._id ? (
@@ -190,3 +208,4 @@ export default function Comment({ _id }: CommentProps) {
     </div>
   );
 }
+

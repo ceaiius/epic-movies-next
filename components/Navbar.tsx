@@ -5,7 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import { Bell, LogOut } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import {formatDistanceToNow} from 'date-fns';
+import { formatDistanceToNow } from "date-fns";
+import socket from "@/lib/socket"; // Import the socket instance
 
 type Notification = {
   _id: string;
@@ -28,16 +29,28 @@ export default function Navbar() {
         : { withCredentials: true },
     [token]
   );
- 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchNotifications();
-    }
-  }, [isAuthenticated]);
 
+  // Fetch notifications and join the user's room when the component mounts
+  useEffect(() => {
+    if (isAuthenticated && user?._id) {
+      fetchNotifications();
+      socket.emit("joinUserRoom", user._id);
+
+      socket.on("newNotification", handleNewNotification);
+
+      return () => {
+        socket.off("newNotification", handleNewNotification);
+      };
+    }
+  }, [isAuthenticated, user?._id]);
+
+  // Fetch notifications from the server
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}notifications`, config);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}notifications`,
+        config
+      );
       setNotifications(response.data);
       setUnreadCount(response.data.filter((n: Notification) => !n.read).length);
     } catch (error) {
@@ -45,19 +58,28 @@ export default function Navbar() {
     }
   };
 
+  // Handle new notifications received from the server
+  const handleNewNotification = ({ count, notification }: { count: number; notification: Notification }) => {
+    setNotifications((prevNotifications) => [notification, ...prevNotifications]);
+    setUnreadCount((prevCount) => prevCount + count);
+  };
+
+  // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}notifications/read`,
-        null,config
+        null,
+        config
       );
-      setUnreadCount(0); 
-      fetchNotifications(); 
+      setUnreadCount(0);
+      fetchNotifications(); // Refresh the notifications list
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
     }
   };
 
+  // Toggle the notifications dropdown and mark notifications as read when opened
   const handleBellClick = () => {
     setIsDropdownOpen((prev) => !prev);
     if (!isDropdownOpen) {
@@ -69,17 +91,14 @@ export default function Navbar() {
     <nav className="bg-white shadow-md p-4">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl font-bold text-gray-800">
-          MyApp
+          Home
         </Link>
         <div className="flex space-x-4">
           {isAuthenticated ? (
             <>
+              {/* Notifications Dropdown */}
               <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleBellClick}
-                >
+                <Button variant="ghost" size="icon" onClick={handleBellClick}>
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
                     <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
@@ -99,7 +118,9 @@ export default function Navbar() {
                         >
                           <p className="text-sm">{notification.message}</p>
                           <p className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(notification.createdAt), {
+                              addSuffix: true,
+                            })}
                           </p>
                         </div>
                       ))
@@ -107,23 +128,30 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+
+              {/* User Avatar */}
               {user?.googleId == null && (
                 <Link href="/profile">
                   <img
-                    src={user?.avatar ? process.env.NEXT_PUBLIC_BASE_URL + user?.avatar : process.env.NEXT_PUBLIC_BASE_URL + 'default'}
+                    src={
+                      user?.avatar
+                        ? process.env.NEXT_PUBLIC_BASE_URL + user?.avatar
+                        : process.env.NEXT_PUBLIC_BASE_URL + "uploads/default"
+                    }
                     alt="Avatar"
                     className="w-10 h-10 rounded-full"
                   />
-                
                 </Link>
               )}
+
+              {/* Logout Button */}
               <Button onClick={logout} variant="outline">
                 <LogOut className="h-5 w-5" />
               </Button>
-              
             </>
           ) : (
             <>
+              {/* Login and Register Buttons */}
               <Link href="/login">
                 <Button variant="outline">Login</Button>
               </Link>
