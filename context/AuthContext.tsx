@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
+import { useRouter } from "next/navigation";
 type User = {
   _id: string;
   googleId: string | null;
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true); 
-
+  const router = useRouter();
   // Check for token on initial load
   useEffect(() => {
     const verifyToken = async () => {
@@ -91,6 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Update the authentication state
       setIsAuthenticated(false);
       setUser(null);
+      router.push("/");
     } catch (error) {
       console.error("Failed to logout:", error);
     }

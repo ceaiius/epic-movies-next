@@ -59,7 +59,7 @@ export default function ProfilePage() {
       );
       login(response.data.token);
       showToast("Success", "Name updated successfully!", "default");
-    } catch (error) {
+    } catch {
       showToast("Error", "Failed to update name.", "destructive");
     } finally {
       setIsLoading(false);
@@ -79,7 +79,7 @@ export default function ProfilePage() {
       );
       login(response.data.token);
       showToast("Success", "Password updated successfully!", "default");
-    } catch (error) {
+    } catch {
       showToast("Error", "Failed to change password.", "destructive");
     } finally {
       setIsLoading(false);
@@ -107,7 +107,7 @@ export default function ProfilePage() {
       setAvatar(response.data.avatar);
       login(response.data.token);
       showToast("Success", "Avatar updated successfully!", "default");
-    } catch (error) {
+    } catch {
       showToast("Error", "Failed to upload avatar.", "destructive");
     } finally {
       setIsLoading(false);

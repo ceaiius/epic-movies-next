@@ -116,8 +116,8 @@ export default function Comment({ _id }: CommentProps) {
   return (
     <div className="mt-4 p-6">
       <h3 className="font-bold mb-2">Comments</h3>
-      {comments.map((comment) => (
-        <div key={comment._id} className="mt-2 p-2 border rounded">
+      {comments.map((comment, index) => (
+        <div key={index} className="mt-2 p-2 border rounded">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <img
