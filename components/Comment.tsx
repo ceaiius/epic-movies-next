@@ -12,7 +12,7 @@ import {
 import { MoreVertical, Edit, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-
+import socket from "@/lib/socket";
 type CommentProps = {
   _id: string;
 };
@@ -112,6 +112,18 @@ export default function Comment({ _id }: CommentProps) {
   useEffect(() => {
     fetchComments();
   }, []);
+
+  useEffect(() => {
+    
+    socket.on("newComment", (newComment) => {
+      setComments((prevComments) => [newComment, ...prevComments]);
+    });
+    console.log(comments);
+    
+    return () => {
+      socket.off("newComment");
+    };
+  }, [comments]);
 
   return (
     <div className="mt-4 p-6">

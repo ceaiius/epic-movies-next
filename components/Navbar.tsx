@@ -107,9 +107,6 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-              <Button onClick={logout} variant="outline">
-                <LogOut className="h-5 w-5" />
-              </Button>
               {user?.googleId == null && (
                 <Link href="/profile">
                   <img
@@ -120,6 +117,10 @@ export default function Navbar() {
                 
                 </Link>
               )}
+              <Button onClick={logout} variant="outline">
+                <LogOut className="h-5 w-5" />
+              </Button>
+              
             </>
           ) : (
             <>
