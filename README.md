@@ -17,13 +17,13 @@ By doing so, they send realtime notifications to the authors of the post to noti
 
 ## Prerequisites
 
-* <img src="./assets/node.png" width="35" style="position: relative; top: 4px" /> *Node@18.18.0 and up*
+* <img src="readme/assets/node.png" width="35" style="position: relative; top: 4px" /> *Node@18.18.0 and up*
 
 #
 
 ## Tech stack
-* <img src="./assets/next.avif" width="35" style="position: relative; top: 4px" /> - front-end framework
-* <img src="./assets/socket.png" width="35" style="position: relative; top: 4px" /> - realtime notifications
+* <img src="readme/assets/next.avif" width="35" style="position: relative; top: 4px" /> - front-end framework
+* <img src="readme/assets/socket.png" width="35" style="position: relative; top: 4px" /> - realtime notifications
 
 #
 
